@@ -64,17 +64,19 @@ public class Core implements ICore {
             case "1" -> showAllBooks();
             case "2" -> searchByAuthor();
             case "3" -> searchByTitle();
-            case "4" -> addNewBook();
-            case "5" -> deleteBook();
-            case "6" -> modifyBook();
-            case "7" -> addNewUser();
-            case "8" -> viewUsers();
-            case "9" -> rentBook(user);
-            case "10" -> returnBook(user);
-            case "11" -> viewMyRentals(user);
-            case "12" -> showStatistics();
-            case "13" -> viewCategories();
-            case "14" -> searchByCategory();
+            case "4" -> rentBook(user);
+            case "5" -> returnBook(user);
+            case "6" -> viewMyRentals(user);
+            case "7" -> searchByCategory();
+            case "8" -> addNewBook();
+            case "9" -> deleteBook();
+            case "10" -> modifyBook();
+            case "11" -> addNewUser();
+            case "12" -> viewUsers();
+            case "13" -> showStatistics();
+            case "14" -> addNewCategory();
+            case "15" -> modifyCategory();
+            case "16" -> deleteCategory();
         }
     }
 
@@ -83,22 +85,25 @@ public class Core implements ICore {
     }
 
     private void showAllBooks() {
+        List<Category> categories = categoryRepository.getAllCategories();
+        gui.showCategories(categories);
+        System.out.println();
         List<Book> allBooks = bookRepository.getAllBooks();
-        gui.showBooks(allBooks);
+        gui.showBooks(allBooks, categories);
     }
 
     private void searchByAuthor() {
         gui.showMessage("Specify author:");
         String author = gui.readUserChoice();
         List<Book> found = bookRepository.findByAuthor(author);
-        gui.showBooks(found);
+        gui.showBooks(found, categoryRepository.getAllCategories());
     }
 
     private void searchByTitle() {
         gui.showMessage("Specify title:");
         String title = gui.readUserChoice();
         List<Book> found = bookRepository.findByTitle(title);
-        gui.showBooks(found);
+        gui.showBooks(found, categoryRepository.getAllCategories());
     }
 
     private void addNewBook() {
@@ -192,7 +197,7 @@ public class Core implements ICore {
     private void viewMyRentals(User user) {
         List<Book> rentedBooks = rentalRepository.getRentedBooksByUser(user.getId());
         gui.showMessage("--- My Rentals ---");
-        gui.showBooks(rentedBooks);
+        gui.showBooks(rentedBooks, categoryRepository.getAllCategories());
     }
 
     private void showStatistics() {
@@ -213,7 +218,54 @@ public class Core implements ICore {
         Integer catId = gui.readCategoryId("Enter Category ID to search: ");
         if (catId != null) {
             List<Book> found = bookRepository.findByCategory(catId);
-            gui.showBooks(found);
+            gui.showBooks(found, categoryRepository.getAllCategories());
+        }
+    }
+
+    private void addNewCategory() {
+        String name = gui.readCategoryName();
+        if (name != null && !name.trim().isEmpty()) {
+            categoryRepository.addCategory(name.trim());
+            gui.showMessage("Category added.");
+        } else {
+            gui.showMessage("Category name cannot be empty.");
+        }
+    }
+
+    private void modifyCategory() {
+        viewCategories();
+        Integer id = gui.readCategoryId("Enter ID of the category to edit: ");
+        if (id == null) return;
+
+        Category category = categoryRepository.getCategoryById(id);
+        if (category == null) {
+            gui.showMessage("Category not found.");
+            return;
+        }
+
+        String newName = gui.readCategoryName();
+        if (newName != null && !newName.trim().isEmpty()) {
+            category.setName(newName.trim());
+            if (categoryRepository.updateCategory(category)) {
+                gui.showMessage("Category updated successfully.");
+            } else {
+                gui.showMessage("Failed to update category.");
+            }
+        } else {
+            gui.showMessage("Category name cannot be empty.");
+        }
+    }
+
+    private void deleteCategory() {
+        viewCategories();
+        Integer id = gui.readCategoryId("Enter ID of the category to delete: ");
+        if (id == null) return;
+
+        boolean success = categoryRepository.deleteCategory(id);
+        if (success) {
+            gui.showMessage("Category deleted successfully.");
+        } else {
+            gui.showMessage("Failed to delete category. Make sure there are no books assigned to it.");
         }
     }
 }

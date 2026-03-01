@@ -16,10 +16,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class GUI implements IGUI {
     private final Scanner scanner;
-    private final List<String> USER_OPTIONS = List.of("0", "1", "2", "3", "9", "10", "11", "13", "14");
+    private final List<String> USER_OPTIONS = List.of("0", "1", "2", "3", "4", "5", "6", "7");
     private final List<String> ADMIN_OPTIONS = Stream.concat(
             USER_OPTIONS.stream(),
-            Stream.of("4", "5", "6", "7", "8", "12")
+            Stream.of("8", "9", "10", "11", "12", "13", "14", "15", "16")
     ).toList();
 
     private void showCommonMenu() {
@@ -27,11 +27,10 @@ public class GUI implements IGUI {
         System.out.println("1. View Books");
         System.out.println("2. Search books by author");
         System.out.println("3. Search books by title");
-        System.out.println("9. Rent a book");
-        System.out.println("10. Return a book");
-        System.out.println("11. My rentals");
-        System.out.println("13. View Categories");
-        System.out.println("14. Search by Category");
+        System.out.println("4. Rent a book");
+        System.out.println("5. Return a book");
+        System.out.println("6. My rentals");
+        System.out.println("7. Search by Category");
     }
 
     private void showUserMenu() {
@@ -40,12 +39,15 @@ public class GUI implements IGUI {
 
     private void showAdminMenu() {
         showCommonMenu();
-        System.out.println("4. Add Book");
-        System.out.println("5. Remove Book");
-        System.out.println("6. Edit Book");
-        System.out.println("7. Add User");
-        System.out.println("8. View Users");
-        System.out.println("12. View Statistics");
+        System.out.println("8. Add Book");
+        System.out.println("9. Remove Book");
+        System.out.println("10. Edit Book");
+        System.out.println("11. Add User");
+        System.out.println("12. View Users");
+        System.out.println("13. View Statistics");
+        System.out.println("14. Add Category");
+        System.out.println("15. Edit Category");
+        System.out.println("16. Delete Category");
     }
 
     @Override
@@ -85,17 +87,27 @@ public class GUI implements IGUI {
     }
 
     @Override
-    public void showBooks(List<Book> books) {
+    public void showBooks(List<Book> books, List<Category> categories) {
         if (books.isEmpty()) {
             System.out.println("No books found.");
         } else {
-            System.out.printf("%-4s | %-20s | %-25s | %-6s | %-6s | %-10s%n", "ID", "Author", "Title", "Year", "Cat ID", "Status");
-            System.out.println("--------------------------------------------------------------------------------------");
+            System.out.printf("%-4s | %-20s | %-25s | %-6s | %-15s | %-10s%n", "ID", "Author", "Title", "Year", "Category", "Status");
+            System.out.println("------------------------------------------------------------------------------------------------");
             for (Book book : books) {
                 String status = book.isAvailable() ? "Available" : "Rented";
-                String cat = book.getCategoryId() != null ? String.valueOf(book.getCategoryId()) : "-";
-                System.out.printf("%-4d | %-20s | %-25s | %-6d | %-6s | %-10s%n",
-                        book.getId(), book.getAuthor(), book.getTitle(), book.getYear(), cat, status);
+                String catName = "-";
+
+                if (book.getCategoryId() != null) {
+                    for (Category c : categories) {
+                        if (c.getId() == book.getCategoryId()) {
+                            catName = c.getName();
+                            break;
+                        }
+                    }
+                }
+
+                System.out.printf("%-4d | %-20s | %-25s | %-6d | %-15s | %-10s%n",
+                        book.getId(), book.getAuthor(), book.getTitle(), book.getYear(), catName, status);
             }
         }
     }
@@ -194,5 +206,11 @@ public class GUI implements IGUI {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    @Override
+    public String readCategoryName() {
+        System.out.print("Enter category name: ");
+        return scanner.nextLine();
     }
 }

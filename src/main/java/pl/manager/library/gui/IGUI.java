@@ -13,7 +13,7 @@ public interface IGUI {
     void showMenuForRole(Role role);
     String readUserChoice();
     boolean isUserChoiceValid(String choice, Role role);
-    void showBooks(List<Book> books);
+    void showBooks(List<Book> books, List<Category> categories);
     Integer readBookId(String prompt);
     Book readBookData();
     void showUsers(List<User> users);
@@ -22,4 +22,5 @@ public interface IGUI {
     void showPopularBooks(Map<String, Integer> popularBooks);
     void showCategories(List<Category> categories);
     Integer readCategoryId(String prompt);
+    String readCategoryName();
 }

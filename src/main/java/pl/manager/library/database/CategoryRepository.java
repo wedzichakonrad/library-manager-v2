@@ -55,4 +55,30 @@ public class CategoryRepository implements ICategoryRepository {
         }
         return null;
     }
+
+    @Override
+    public boolean updateCategory(Category category) {
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement("UPDATE categories SET name = ? WHERE id = ?")) {
+
+            ps.setString(1, category.getName());
+            ps.setInt(2, category.getId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteCategory(int id) {
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM categories WHERE id = ?")) {
+
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
 }

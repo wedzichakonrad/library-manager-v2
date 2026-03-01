@@ -5,6 +5,7 @@ Konsolowa aplikacja do zarządzania biblioteką napisana w Javie, wykorzystując
 ## Wymagania
 * Java 17 (lub nowsza)
 * IDE (Zalecane: IntelliJ IDEA)
+* Włączona obsługa wtyczki Lombok w IDE (Settings -> Build, Execution, Deployment -> Compiler -> Annotation Processors -> Enable annotation processing)
 
 ## Jak uruchomić projekt w IntelliJ IDEA
 
@@ -16,7 +17,7 @@ Konsolowa aplikacja do zarządzania biblioteką napisana w Javie, wykorzystując
     * Wybierz `File` -> `Open...` i wskaż główny folder projektu (ten zawierający plik `pom.xml`).
 3. **Pobierz zależności**
     * Po otwarciu projektu, IntelliJ powinien automatycznie wykryć plik `pom.xml`.
-    * Kliknij prawym przyciskiem myszy na plik `pom.xml` -> `Maven` -> `Reload project`, aby pobrać wszystkie niezbędne biblioteki (Spring, H2, BCrypt, Lombok).
+    * Kliknij prawym przyciskiem myszy na plik `pom.xml` -> `Maven` -> `Add as Maven Project`, aby pobrać wszystkie niezbędne biblioteki (Spring, H2, BCrypt, Lombok).
 4. **Uruchom aplikację**
     * Znajdź główną klasę startową: `src/main/java/pl/manager/library/App.java`.
     * Kliknij w zielony trójkąt (Run) obok metody `main` lub na pasku narzędzi.
