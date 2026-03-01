@@ -1,44 +1,79 @@
 package pl.manager.library.database;
 
-import lombok.Getter;
-import org.apache.commons.codec.digest.DigestUtils;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 import pl.manager.library.model.Role;
 import pl.manager.library.model.User;
+import pl.manager.library.config.DatabaseConfig;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class UserRepository implements IUserRepository {
-    @Getter
-    private final List<User> users = new ArrayList<>();
-    private int idCounter = 0;
-
-    public UserRepository() {
-        this.addUser("admin", "admin", Role.ADMIN);
-        this.addUser("user", "user", Role.USER);
-    }
-
-    public void addUser(String login, String password, Role role) throws IllegalArgumentException {
-        if (login.isEmpty() || password.isEmpty()) {
-            throw new IllegalArgumentException("Password and login cannot be empty.");
-        }
-
-        if (getUserByLogin(login) != null) {
-            throw new IllegalArgumentException("User with login '" + login + "' already exists.");
-        }
-
-        users.add(new User(login, DigestUtils.md5Hex(password), role, idCounter++));
-    }
 
     @Override
     public User getUserByLogin(String login) {
-        for (User user : users) {
-            if (user.getLogin().equals(login) ) {
-                return user;
+        String sql = "SELECT * FROM users WHERE username = ?";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, login);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToUser(rs);
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public void addUser(String login, String password, Role role) {
+        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, login);
+            ps.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
+            ps.setString(3, role.name());
+
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error when adding user: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<User> getUsers() {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM users";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                users.add(mapRowToUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    private User mapRowToUser(ResultSet rs) throws SQLException {
+        return new User(
+                rs.getInt("id"),
+                rs.getString("username"),
+                rs.getString("password"),
+                Role.valueOf(rs.getString("role"))
+        );
     }
 }

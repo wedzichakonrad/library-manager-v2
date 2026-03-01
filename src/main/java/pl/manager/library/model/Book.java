@@ -1,20 +1,23 @@
 package pl.manager.library.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Book {
-    private final int id;
+    private int id;
     private String title;
     private String author;
+    private int year;
+    private boolean available;
+    private Integer categoryId;
 
-    public Book(String title, String author) {
-        this.id = 0;
+    public Book(String title, String author, int year) {
         this.title = title;
         this.author = author;
+        this.year = year;
+        this.available = true;
     }
 }

@@ -110,12 +110,22 @@ public class GUI implements IGUI {
         String author = scanner.nextLine();
         System.out.print("Enter book title: ");
         String title = scanner.nextLine();
+        System.out.print("Enter year of publication: ");
+
+        int year;
+        try {
+            year = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid year. Setting to 0.");
+            year = 0;
+        }
 
         if (author.isBlank() || title.isBlank()) {
             System.out.println("Author and title cannot be empty!");
             return null;
         }
-        return new Book(title, author);
+
+        return new Book(title, author, year);
     }
 
     @Override

@@ -94,7 +94,7 @@ public class Core implements ICore {
     private void addNewBook() {
         Book book = gui.readBookData();
         if (book != null) {
-            bookRepository.addBook(book.getAuthor(), book.getTitle());
+            bookRepository.addBook(book);
             gui.showMessage("Book added.");
         }
     }
