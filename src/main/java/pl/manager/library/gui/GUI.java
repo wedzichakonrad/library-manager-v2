@@ -3,10 +3,12 @@ package pl.manager.library.gui;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.manager.library.model.Book;
+import pl.manager.library.model.Category;
 import pl.manager.library.model.Role;
 import pl.manager.library.model.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
@@ -14,10 +16,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class GUI implements IGUI {
     private final Scanner scanner;
-    private final List<String> USER_OPTIONS = List.of("0", "1", "2", "3");
+    private final List<String> USER_OPTIONS = List.of("0", "1", "2", "3", "9", "10", "11", "13", "14");
     private final List<String> ADMIN_OPTIONS = Stream.concat(
             USER_OPTIONS.stream(),
-            Stream.of("4", "5", "6", "7", "8")
+            Stream.of("4", "5", "6", "7", "8", "12")
     ).toList();
 
     private void showCommonMenu() {
@@ -25,6 +27,11 @@ public class GUI implements IGUI {
         System.out.println("1. View Books");
         System.out.println("2. Search books by author");
         System.out.println("3. Search books by title");
+        System.out.println("9. Rent a book");
+        System.out.println("10. Return a book");
+        System.out.println("11. My rentals");
+        System.out.println("13. View Categories");
+        System.out.println("14. Search by Category");
     }
 
     private void showUserMenu() {
@@ -38,6 +45,7 @@ public class GUI implements IGUI {
         System.out.println("6. Edit Book");
         System.out.println("7. Add User");
         System.out.println("8. View Users");
+        System.out.println("12. View Statistics");
     }
 
     @Override
@@ -81,8 +89,13 @@ public class GUI implements IGUI {
         if (books.isEmpty()) {
             System.out.println("No books found.");
         } else {
+            System.out.printf("%-4s | %-20s | %-25s | %-6s | %-6s | %-10s%n", "ID", "Author", "Title", "Year", "Cat ID", "Status");
+            System.out.println("--------------------------------------------------------------------------------------");
             for (Book book : books) {
-                System.out.println(book.getId() + " " + book.getAuthor() + " - " + book.getTitle());
+                String status = book.isAvailable() ? "Available" : "Rented";
+                String cat = book.getCategoryId() != null ? String.valueOf(book.getCategoryId()) : "-";
+                System.out.printf("%-4d | %-20s | %-25s | %-6d | %-6s | %-10s%n",
+                        book.getId(), book.getAuthor(), book.getTitle(), book.getYear(), cat, status);
             }
         }
     }
@@ -99,7 +112,7 @@ public class GUI implements IGUI {
             }
             return id;
         } catch (NumberFormatException e) {
-            System.out.println("Invalid book ID. Please enter a valid number.");
+            System.out.println("Invalid book ID.");
             return null;
         }
     }
@@ -131,7 +144,7 @@ public class GUI implements IGUI {
     @Override
     public void showUsers(List<User> users) {
         for (User user : users) {
-            System.out.println(user.getId() + " " + user.getLogin());
+            System.out.println(user.getId() + " " + user.getLogin() + " [" + user.getRole() + "]");
         }
     }
 
@@ -140,4 +153,46 @@ public class GUI implements IGUI {
         System.out.println(message);
     }
 
+    @Override
+    public void showStatistics(Map<String, Integer> stats) {
+        System.out.println("--- Library Statistics ---");
+        for (Map.Entry<String, Integer> entry : stats.entrySet()) {
+            System.out.printf("%-20s : %d%n", entry.getKey(), entry.getValue());
+        }
+        System.out.println("--------------------------");
+    }
+
+    @Override
+    public void showPopularBooks(Map<String, Integer> popularBooks) {
+        System.out.println("--- Top 5 Most Popular Books ---");
+        if (popularBooks.isEmpty()) {
+            System.out.println("No rentals recorded yet.");
+        } else {
+            for (Map.Entry<String, Integer> entry : popularBooks.entrySet()) {
+                System.out.printf("Times rented: %-3d | %s%n", entry.getValue(), entry.getKey());
+            }
+        }
+        System.out.println("--------------------------------");
+    }
+
+    @Override
+    public void showCategories(List<Category> categories) {
+        System.out.println("--- Categories ---");
+        for (Category cat : categories) {
+            System.out.println(cat.getId() + ". " + cat.getName());
+        }
+    }
+
+    @Override
+    public Integer readCategoryId(String prompt) {
+        System.out.print(prompt);
+        String input = scanner.nextLine();
+        try {
+            int id = Integer.parseInt(input);
+            if (id <= 0) return null;
+            return id;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package pl.manager.library.authentication;
 
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 import pl.manager.library.database.IUserRepository;
 import pl.manager.library.model.User;
@@ -12,11 +13,18 @@ public class Authenticator implements IAuthenticator {
 
     @Override
     public User authenticate(User userFromGui) {
-        User foundUser = usersRepository.getUserByLogin(userFromGui.getLogin());
+        String login = userFromGui.getLogin().trim();
+        String password = userFromGui.getPassword().trim();
+
+        User foundUser = usersRepository.getUserByLogin(login);
 
         if (foundUser == null) {
-            System.out.println("User not found - " + userFromGui.getLogin());
+            System.out.println("User not found: '" + login + "'");
             return null;
+        }
+
+        if (BCrypt.checkpw(password, foundUser.getPassword())) {
+            return foundUser;
         }
 
         System.out.println("Wrong password");

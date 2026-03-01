@@ -1,6 +1,7 @@
 package pl.manager.library.database;
 
 import pl.manager.library.model.Book;
+
 import java.util.List;
 
 public interface IBookRepository {
@@ -8,7 +9,7 @@ public interface IBookRepository {
     Book getBookById(int id);
     List<Book> findByAuthor(String author);
     List<Book> findByTitle(String title);
-
+    List<Book> findByCategory(int categoryId);
     void addBook(Book book);
     boolean deleteBook(int id);
     boolean updateBook(Book book);
